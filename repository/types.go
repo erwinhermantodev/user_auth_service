@@ -2,8 +2,8 @@ package repository
 
 type User struct {
 	ID          int
-	PhoneNumber string
-	FullName    string
+	PhoneNumber string `json:"phone_number"`
+	FullName    string `json:"full_name"`
 	Password    string
 }
 

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/erwinhermantodev/user_auth_service/handler"
+	"github.com/erwinhermantodev/user_auth_service/middleware"
 	"github.com/erwinhermantodev/user_auth_service/repository"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq" // Import PostgreSQL driver
@@ -41,8 +42,8 @@ func main() {
     // Register routes
     e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
-	e.GET("/profile", userHandler.GetProfile)
-	e.PUT("/profile", userHandler.UpdateProfile)
+	e.GET("/profile", userHandler.GetProfile, middleware.JWTAuthMiddleware)
+	e.PUT("/profile", userHandler.UpdateProfile, middleware.JWTAuthMiddleware)
 
     // Start server
     e.Logger.Fatal(e.Start(":8080"))

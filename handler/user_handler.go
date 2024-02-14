@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -99,10 +98,6 @@ func (h *UserHandler) Login(c echo.Context) error {
     }
 
 	user, err := h.repo.FindUserByPhone(loginInfo.PhoneNumber)
-	fmt.Println("===============")
-	fmt.Println("err")
-	fmt.Println(err)
-	fmt.Println("===============")
 	if err != nil {
 		return err
 	}
@@ -131,8 +126,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 }
 
 func (h *UserHandler) GetProfile(c echo.Context) error {
-	userID := c.Get("user").(int)
-
+	userID := c.Get("userID").(int)
 	user, err := h.repo.GetUserByID(userID)
 	if err != nil {
 		return err
@@ -149,13 +143,14 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 }
 
 func (h *UserHandler) UpdateProfile(c echo.Context) error {
-	userID := c.Get("user").(int)
+	userID := c.Get("userID").(int)
 
 	var updateUser repository.User
+	updateUser.ID = userID
 	if err := c.Bind(&updateUser); err != nil {
 		return err
 	}
-
+	
 	if err := validateUpdateUserFields(updateUser); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
