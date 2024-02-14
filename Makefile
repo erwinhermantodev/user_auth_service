@@ -6,7 +6,6 @@ run:
 	go run cmd/main.go
 
 init:
-	go install github.com/vektra/mockery/v2@latest
 	go mod tidy
 	go mod vendor
 
