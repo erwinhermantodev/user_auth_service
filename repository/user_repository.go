@@ -24,7 +24,7 @@ func (ur *userRepository) CreateUser(user *User) (int, error) {
 	}
 
 	var userID int
-	err = ur.db.QueryRow("INSERT INTO users (phone, full_name, password) VALUES ($1, $2, $3) RETURNING id",
+	err = ur.db.QueryRow("INSERT INTO users (phone_number, full_name, password) VALUES ($1, $2, $3) RETURNING id",
 		user.PhoneNumber, user.FullName, hashedPassword).Scan(&userID)
 	if err != nil {
 		return 0, err
@@ -35,7 +35,7 @@ func (ur *userRepository) CreateUser(user *User) (int, error) {
 
 func (ur *userRepository) FindUserByPhone(phone string) (*User, error) {
 	var user User
-	err := ur.db.QueryRow("SELECT id, phone, full_name, password FROM users WHERE phone = $1", phone).
+	err := ur.db.QueryRow("SELECT id, phone_number, full_name, password FROM users WHERE phone_number = $1", phone).
 		Scan(&user.ID, &user.PhoneNumber, &user.FullName, &user.Password)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -54,7 +54,7 @@ func (ur *userRepository) IncrementLoginCount(userID int) error {
 
 func (ur *userRepository) GetUserByID(userID int) (*User, error) {
 	var user User
-	err := ur.db.QueryRow("SELECT id, phone, full_name, password FROM users WHERE id = $1", userID).
+	err := ur.db.QueryRow("SELECT id, phone_number, full_name, password FROM users WHERE id = $1", userID).
 		Scan(&user.ID, &user.PhoneNumber, &user.FullName, &user.Password)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

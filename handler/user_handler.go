@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -20,7 +21,7 @@ func NewUserHandler(repo repository.UserRepository) *UserHandler {
 }
 
 func validateUserInput(user repository.User) error {
-	if len(user.PhoneNumber) < 10 || len(user.PhoneNumber) > 13 || !strings.HasPrefix(user.PhoneNumber, "+62") {
+	if len(user.PhoneNumber) < 10 || len(user.PhoneNumber) > 13 && !strings.HasPrefix(user.PhoneNumber, "+62") {
 		return errors.New("phone number must be 10-13 characters long and start with '+62'")
 	}
 
@@ -59,11 +60,11 @@ func (h *UserHandler) Register(c echo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-
+	
 	if err := validateUserInput(user); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-
+	
 	userID, err := h.repo.CreateUser(&user)
 	if err != nil {
 		return err
@@ -98,6 +99,10 @@ func (h *UserHandler) Login(c echo.Context) error {
     }
 
 	user, err := h.repo.FindUserByPhone(loginInfo.PhoneNumber)
+	fmt.Println("===============")
+	fmt.Println("err")
+	fmt.Println(err)
+	fmt.Println("===============")
 	if err != nil {
 		return err
 	}
