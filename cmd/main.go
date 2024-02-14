@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 
+	"github.com/erwinhermantodev/user_auth_service/generated"
 	"github.com/erwinhermantodev/user_auth_service/handler"
 	"github.com/erwinhermantodev/user_auth_service/middleware"
 	"github.com/erwinhermantodev/user_auth_service/repository"
@@ -13,16 +16,16 @@ import (
 )
 
 const (
-    host     = "localhost"
-    port     = 5435
-    user     = "myuser"
-    password = "mypassword"
-    dbname   = "auth_user_db"
+	host     = "localhost"
+	port     = 5435
+	user     = "myuser"
+	password = "mypassword"
+	dbname   = "auth_user_db"
 )
 
 func connectionString() string {
-    return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-        host, port, user, password, dbname)
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
 }
 
 func main() {
@@ -31,20 +34,38 @@ func main() {
 		log.Fatal("failed to connect to database:", err)
 	}
 	defer db.Close()
-    e := echo.New()
-    
-    // Initialize repository
-    repo := repository.NewUserRepository(db)
+	e := echo.New()
 
-    // Initialize handlers
-    userHandler := handler.NewUserHandler(repo)
+	// Initialize repository
+	repo := repository.NewUserRepository(db)
 
-    // Register routes
-    e.POST("/register", userHandler.Register)
+	// Initialize handlers
+	userHandler := handler.NewUserHandler(repo)
+
+	// Register routes
+	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
 	e.GET("/profile", userHandler.GetProfile, middleware.JWTAuthMiddleware)
 	e.PUT("/profile", userHandler.UpdateProfile, middleware.JWTAuthMiddleware)
 
-    // Start server
-    e.Logger.Fatal(e.Start(":8080"))
+	// Serve Swagger UI
+    e.GET("/swagger", echoSwaggerMiddleware())
+
+	// Start server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	e.Logger.Fatal(e.Start(":" + port))
+}
+
+// echoSwaggerMiddleware serves the Swagger UI files
+func echoSwaggerMiddleware() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		spec, err := generated.GetSwagger()
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, spec)
+	}
 }

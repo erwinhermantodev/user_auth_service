@@ -1,6 +1,6 @@
 package repository
 
-type UserRepository interface {
+type UserRepositoryInterface interface {
 	CreateUser(user *User) (int, error)
 	FindUserByPhone(phone string) (*User, error)
 	IncrementLoginCount(userID int) error

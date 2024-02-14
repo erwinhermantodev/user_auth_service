@@ -12,10 +12,10 @@ import (
 )
 
 type UserHandler struct {
-	repo repository.UserRepository
+	repo repository.UserRepositoryInterface
 }
 
-func NewUserHandler(repo repository.UserRepository) *UserHandler {
+func NewUserHandler(repo repository.UserRepositoryInterface) *UserHandler {
 	return &UserHandler{repo}
 }
 
@@ -94,19 +94,19 @@ func (h *UserHandler) Login(c echo.Context) error {
 	}
 
 	if err := validateLoginInfo(loginInfo); err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-    }
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
 
 	user, err := h.repo.FindUserByPhone(loginInfo.PhoneNumber)
 	if err != nil {
 		return err
 	}
 	if user == nil {
-		return echo.ErrUnauthorized
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid phone number or password"})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginInfo.Password)); err != nil {
-		return echo.ErrUnauthorized
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid phone number or password"})
 	}
 
 	token := jwt.New(jwt.SigningMethodHS256)
