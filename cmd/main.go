@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/erwinhermantodev/user_auth_service/generated"
+	swaggerGenerated "github.com/erwinhermantodev/user_auth_service/generated"
 	"github.com/erwinhermantodev/user_auth_service/handler"
 	"github.com/erwinhermantodev/user_auth_service/middleware"
 	"github.com/erwinhermantodev/user_auth_service/repository"
@@ -62,7 +62,7 @@ func main() {
 // echoSwaggerMiddleware serves the Swagger UI files
 func echoSwaggerMiddleware() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		spec, err := generated.GetSwagger()
+		spec, err := swaggerGenerated.GetSwagger()
 		if err != nil {
 			return err
 		}
